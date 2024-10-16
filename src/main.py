@@ -6,6 +6,12 @@ import subprocess
 COMMAND_NAME = "dv"
 DEVAULT_DIR = os.getenv("DEVAULT_DIR") or os.path.expanduser("~/DEVAULT")
 
+
+def yesno(prompt: str):
+    answer = input(f"{ prompt } (Y/n) ")
+    if answer in ["n", "N"]: return
+
+
 def print_version() -> None:
     print("v0.0.0")
 
@@ -54,6 +60,18 @@ def list_tree() -> None:
     return print(subprocess.run(['tree', '-L', '3', DEVAULT_DIR], capture_output=True, text=True).stdout)
 
 
+def remove_entity(entity: str) -> None:
+    path = os.path.join(DEVAULT_DIR, entity or "")
+
+    yesno(f"Are you sure you want to delete '{ entity }'?")
+
+    if not os.path.exists(path): raise ValueError("Invalid path.")
+    if "cmd.exe" in os.getenv("COMSPEC", ""):
+        return print(subprocess.run(['cmd', '/c', f'rmdir /s /q {path}'], capture_output=True, text=True).stdout)
+
+    return print(subprocess.run(['rm', '-rf', path], capture_output=True, text=True).stdout)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="A minimal tool to manage your repositories and git clones.",
@@ -89,6 +107,6 @@ if __name__ == "__main__":
     elif command in ["ls", "list", "dir"]:         list_entities(arg)
     elif command == "tree":                        list_tree()
     # elif command == "mkrepo" and arg:              make_repo(arg)
-    # elif command in ["remove", "rm"] and arg:      remove_entity(arg)
+    elif command in ["remove", "rm"] and arg:      remove_entity(arg)
     # elif command == "open" and arg:                open(args.arg)
     else:                                          parser.print_help()
