@@ -7,11 +7,6 @@ COMMAND_NAME = "dv"
 DEVAULT_DIR = os.getenv("DEVAULT_DIR") or os.path.expanduser("~/DEVAULT")
 
 
-def yesno(prompt: str):
-    answer = input(f"{ prompt } (Y/n) ")
-    if answer in ["n", "N"]: return
-
-
 def print_version() -> None:
     print("v0.0.0")
 
@@ -44,7 +39,6 @@ def clone_repo(url: str) -> None:
 
 def list_entities(entity: str) -> None:
     path = os.path.join(DEVAULT_DIR, entity or "")
-
     if not os.path.exists(path): raise ValueError("Invalid path.")
     if "cmd.exe" in os.getenv("COMSPEC", ""):
         return print(subprocess.run(["cmd", "/c", "dir", path], capture_output=True, text=True).stdout)
@@ -62,14 +56,29 @@ def list_tree() -> None:
 
 def remove_entity(entity: str) -> None:
     path = os.path.join(DEVAULT_DIR, entity or "")
-
-    yesno(f"Are you sure you want to delete '{ entity }'?")
-
     if not os.path.exists(path): raise ValueError("Invalid path.")
+
+    answer = input(f"Are you sure you want to remove '{ entity }' (Y/n) ")
+    if answer not in ["Y", "y"]: return
+
     if "cmd.exe" in os.getenv("COMSPEC", ""):
         return print(subprocess.run(['cmd', '/c', f'rmdir /s /q {path}'], capture_output=True, text=True).stdout)
 
     return print(subprocess.run(['rm', '-rf', path], capture_output=True, text=True).stdout)
+
+
+def make_repo() -> None:
+    provider = input(f"Enter a provider e.g. (github.com): ")
+    if not provider: return print(f"Invalid provider { provider }")
+    username = input(f"Enter your username: ")
+    if not username: return print(f"Invalid username { username }")
+    repository = input(f"Enter a repository name: ")
+    if not repository: return print(f"Invalid username { repository }")
+
+    path = os.path.join(DEVAULT_DIR, provider, username, repository)
+
+    os.makedirs(path, exist_ok=True)
+    print(subprocess.run([ "git", "init", path ], check=True).stdout)
 
 
 if __name__ == "__main__":
@@ -106,7 +115,6 @@ if __name__ == "__main__":
     elif command == "clone" and arg:               clone_repo(arg)
     elif command in ["ls", "list", "dir"]:         list_entities(arg)
     elif command == "tree":                        list_tree()
-    # elif command == "mkrepo" and arg:              make_repo(arg)
+    elif command == "mkrepo":                      make_repo()
     elif command in ["remove", "rm"] and arg:      remove_entity(arg)
-    # elif command == "open" and arg:                open(args.arg)
     else:                                          parser.print_help()
