@@ -1,5 +1,6 @@
+import utils
 import argparse
-from main import *
+from devault import *
 
 
 COMMAND_NAME = "dev"
