@@ -1,120 +1,144 @@
 import os
 import re
+import utils
 import argparse
-import subprocess
-
-COMMAND_NAME = "dv"
-DEVAULT_DIR = os.getenv("DEVAULT_DIR") or os.path.expanduser("~/DEVAULT")
 
 
-def print_version() -> None:
-    print("v0.0.0")
+COMMAND_NAME = "dev"
+DEVAULT_DIR = os.getenv("DEVAULT_DIR") or os.path.expanduser("~/Dev")
 
 
-def parse_repo_url(url: str):
+def parse_uri(uri: str):
     URL_PATTERNS = [
-        r"https?://(?P<provider>[^/]+)/(?P<username>[^/]+)/(?P<repository>[^/]+)(?:\.git)?",
-        r"git@(?P<provider>[^:]+):(?P<username>[^/]+)/(?P<repository>[^/]+)(?:\.git)?"
+        r'^https?://(?P<provider>[^/]+)(?:/(?P<directory>.*?))?/(?P<repository>[^/]+)\.git$',
+        r'^git@(ssh\.)?(?P<provider>[^:]+)(?::(?P<directory>.*?))?/(?P<repository>[^/]+)\.git$',
     ]
 
     for pattern in URL_PATTERNS:
-        match = re.search(pattern, url)
+        match = re.search(pattern, uri)
         if match:
             provider = match.group("provider")
+            directory = match.group("directory") or ""
             repository = match.group("repository")
-            username = match.group("username") or provider.split(".")[-2]
 
-            return provider, username, repository
+            return provider, directory, repository
 
     raise ValueError("Invalid URL.")
 
 
-def clone_repo(url: str) -> None:
-    provider, username, repository = parse_repo_url(url)
-    destination = f"{ DEVAULT_DIR }/{ provider }/{ username }/{ repository }"
-
-    os.makedirs(destination, exist_ok=True)
-    subprocess.run([ "git", "clone", url, destination ], check=True)
+def init() -> None:
+    utils.mkdir([DEVAULT_DIR])
+    print(f"{ DEVAULT_DIR } has been initialized.")
 
 
-def list_entities(entity: str) -> None:
-    path = os.path.join(DEVAULT_DIR, entity or "")
-    if not os.path.exists(path): raise ValueError("Invalid path.")
-    if "cmd.exe" in os.getenv("COMSPEC", ""):
-        return print(subprocess.run(["cmd", "/c", "dir", path], capture_output=True, text=True).stdout)
-
-    return print(subprocess.run(["ls", "-la", path], capture_output=True, text=True).stdout)
+def ls(*paths: str) -> None:
+    if len(paths) < 1: paths = [""]
+    arguments = [f"{ DEVAULT_DIR }/{ path }" for path in paths]
+    utils.ls(arguments)
 
 
-def list_tree() -> None:
-    if not os.path.exists(DEVAULT_DIR): return
-    if "cmd.exe" in os.getenv("COMSPEC", ""):
-        return print(subprocess.run(['cmd', '/c', f'tree /F /A /N /L 3 {DEVAULT_DIR}'], capture_output=True, text=True).stdout)
-
-    return print(subprocess.run(['tree', '-L', '3', DEVAULT_DIR], capture_output=True, text=True).stdout)
+def rm(*paths: str) -> None:
+    arguments = [f"{ DEVAULT_DIR }/{ path }" for path in paths]
+    utils.rm(arguments)
 
 
-def remove_entity(entity: str) -> None:
-    path = os.path.join(DEVAULT_DIR, entity or "")
-    if not os.path.exists(path): raise ValueError("Invalid path.")
-
-    answer = input(f"Are you sure you want to remove '{ entity }' (Y/n) ")
-    if answer not in ["Y", "y"]: return
-
-    if "cmd.exe" in os.getenv("COMSPEC", ""):
-        return print(subprocess.run(['cmd', '/c', f'rmdir /s /q {path}'], capture_output=True, text=True).stdout)
-
-    return print(subprocess.run(['rm', '-rf', path], capture_output=True, text=True).stdout)
+def find(query: str) -> None:
+    regex = re.compile(query)
+    [
+        print(repository) for repository in utils.get_repos(DEVAULT_DIR)
+        if regex.search(repository)
+    ]
 
 
-def make_repo() -> None:
-    provider = input(f"Enter a provider e.g. (github.com): ")
-    if not provider: return print(f"Invalid provider { provider }")
-    username = input(f"Enter your username: ")
-    if not username: return print(f"Invalid username { username }")
-    repository = input(f"Enter a repository name: ")
-    if not repository: return print(f"Invalid username { repository }")
+def clone(*args: str) -> None:
+    uri = args[0]
+    collections = args[1:] if len(args) > 1 else []
+    collections = [f"{ DEVAULT_DIR }/{ collection }" for collection in collections ]
 
-    path = os.path.join(DEVAULT_DIR, provider, username, repository)
+    provider, directory, repository = parse_uri(uri)
+    destination = f"{ DEVAULT_DIR }/clones/{ provider }/{ directory }/{ repository }/"
+    utils.clone(uri, destination)
 
-    os.makedirs(path, exist_ok=True)
-    print(subprocess.run([ "git", "init", path ], check=True).stdout)
+    for collection in collections:
+        utils.mkdir([collection])
+        utils.ln(destination, f"{ collection }/{ repository }")
 
+
+def update(*repositories: str) -> None:
+    if "." in repositories: repositories = [""]
+    repositories = [f"{ DEVAULT_DIR }/clones/{ repository }" for repository in repositories]
+
+    for repository in repositories:
+        [utils.update(repository) for repository in utils.get_repos(repository)]
+
+
+def group(*args: str) -> None:
+    if len(args) < 2: utils.exit(1, print("At least two arguments required for grouping."))
+    repositories = args[:-1]
+    collection = args[-1]
+
+    for repository in repositories:
+        utils.ln(repository, collection)
+
+
+def mkrepo() -> None:
+    name = input("Repositories Name: ") or utils.exit(1, print("Repository name required."))
+    directory = input("Repositories directory: ")
+    starters = input("Starter content (README.md): ") or "README.md"
+    collections = input("Add to collection(s): ")
+
+    repository = f"{ DEVAULT_DIR }/clones/local/{ directory }/{ name }"
+    starters = [ f"{ repository }/{ item }" for item in starters.split(" ") ]
+
+    utils.mkdir([repository])
+    utils.git_init(repository)
+    [ group(repository, collection) for collection in collections ]
+
+    for item in starters:
+        if item[-1] == "/":
+            utils.mkdir([item])
+        else:
+            utils.mkdir(["/".join(item.split("/")[:-1])])
+            utils.touch([item])
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="A minimal tool to manage your repositories and git clones.",
+        description="A minimal tool to manage your repositories",
         epilog="Examples:"
-               f"\n\t{ COMMAND_NAME } clone <repo-url>           # Clone a repository"
-               f"\n\t{ COMMAND_NAME } ls github.com              # List entities in /github.com"
-               f"\n\t{ COMMAND_NAME } tree                       # Tree list entities",
+               f"\n\t{ COMMAND_NAME } init                       # initialize a vault"
+               f"\n\t{ COMMAND_NAME } clone <repo-url>           # Clone a repository",
         formatter_class=argparse.RawTextHelpFormatter
     )
 
-    parser.add_argument(
-        "command",
-        choices=["version", "clone", "ls", "tree", "mkrepo", "rm", "open"],
+    parser.add_argument("command",
+        choices=["help", "version", "init", "ls", "rm", "find", "clone", "update", "group", "mkrepo"],
         help=(
-            "version              : Print the current version"
-            "\nclone <repo-url>     : Clone a repository into your DEVault"
-            "\nls [entity]          : List entities in your DEVault"
-            "\ntree                 : Display a tree view of entities"
-            "\nmkrepo <repo-name>   : Create a new repository"
-            "\nrm <entity>          : Remove an entity from your DEVault"
-            "\nopen <entity>        : Open an entity in the default editor"
+            "\nhelp                 show list of command-line options"
+            "\nversion              show the current version"
+            "\ninit                 initialize a dev vault"
+            "\nls                   list entities in a vault"
+            "\nrm                   remove entitie"
+            "\nfind                 find a repository (supports regex)"
+            "\nclone                clone a repository to a vault"
+            "\nupdate               pull latest changes from upstream"
+            "\ngroup                group repositories into collections"
+            "\nmkrepo               Create and initialize a local git repository"
         )
     )
 
-    parser.add_argument("arg", nargs="?", help="Argument for the command, e.g. [<repo-url>, <entity>].")
+    parser.add_argument("arg", nargs="*", help="Argument for the command.")
 
     args = parser.parse_args()
     command = args.command
-    arg = args.arg
+    arguments = args.arg
 
-    if   command == "version":                     print_version()
-    elif command == "clone" and arg:               clone_repo(arg)
-    elif command in ["ls", "list", "dir"]:         list_entities(arg)
-    elif command == "tree":                        list_tree()
-    elif command == "mkrepo":                      make_repo()
-    elif command in ["remove", "rm"] and arg:      remove_entity(arg)
-    else:                                          parser.print_help()
+    if   command == "version":                   utils.version()
+    elif command == "init":                      init()
+    elif command == "ls":                        ls(*arguments)
+    elif command == "rm" and arguments:          rm(*arguments)
+    elif command == "find" and arguments:        find(arguments[0])
+    elif command == "clone" and arguments:       clone(*arguments)
+    elif command == "update" and arguments:      update(*arguments)
+    elif command == "group" and arguments:       group(*arguments)
+    elif command == "mkrepo":                    mkrepo()
+    else:                                        parser.print_help()
