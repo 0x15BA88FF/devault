@@ -3,7 +3,6 @@ import re
 import utils
 
 
-COMMAND_NAME = "dev"
 DEVAULT_DIR = os.getenv("DEVAULT_DIR") or os.path.expanduser("~/Dev")
 
 

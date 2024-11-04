@@ -2,6 +2,9 @@ import argparse
 from main import *
 
 
+COMMAND_NAME = "dev"
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="A minimal tool to manage your repositories",
