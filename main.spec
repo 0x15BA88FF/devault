@@ -31,7 +31,7 @@ exe = EXE(
     strip=False,
     upx=True,
     console=True,
-    version='0.0.1',
+    version='0.0.2',
     description='Dev Vault is a minimal command-line tool designed to manage your Git repositories efficiently.',
     company_name='0x15BA88FF',
 )
