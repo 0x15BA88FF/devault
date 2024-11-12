@@ -54,7 +54,7 @@ def clone(*args: str) -> None:
     collections = [f"{ DEVAULT_DIR }/{ collection }" for collection in collections ]
 
     provider, directory, repository = parse_uri(uri)
-    destination = f"{ DEVAULT_DIR }/clones/{ provider }/{ directory }/{ repository }/"
+    destination = f"{ DEVAULT_DIR }/labs/{ provider }/{ directory }/{ repository }/"
     utils.clone(uri, destination)
 
     for collection in collections:
@@ -64,7 +64,7 @@ def clone(*args: str) -> None:
 
 def update(*repositories: str) -> None:
     if "." in repositories: repositories = [""]
-    repositories = [f"{ DEVAULT_DIR }/clones/{ repository }" for repository in repositories]
+    repositories = [f"{ DEVAULT_DIR }/labs/{ repository }" for repository in repositories]
 
     for repository in repositories:
         [utils.update(repository) for repository in utils.get_repos(repository)]
@@ -85,7 +85,7 @@ def mkrepo() -> None:
     starters = input("Starter content (README.md): ") or "README.md"
     collections = input("Add to collection(s): ")
 
-    repository = f"{ DEVAULT_DIR }/clones/local/{ directory }/{ name }"
+    repository = f"{ DEVAULT_DIR }/labs/local/{ directory }/{ name }"
     starters = [ f"{ repository }/{ item }" for item in starters.split(" ") ]
 
     utils.mkdir([repository])
