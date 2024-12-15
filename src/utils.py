@@ -10,7 +10,7 @@ def exit(code: int = 0, callback: Optional[Callable[[], None]] = None) -> None:
 
 
 def version() -> None:
-    print("v0.0.2")
+    print("v1.0.0 - beta")
 
 
 def ls(paths: list) -> None:
