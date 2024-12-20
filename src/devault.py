@@ -29,8 +29,7 @@ def init() -> None:
 
 def ls(*paths: str) -> None:
     if len(paths) < 1: paths = [""]
-    arguments = [f"{ DEVDIR }/{ path }" for path in paths]
-    utils.ls(arguments)
+    [ utils.ls(f"{ DEVDIR }/{ path }") for path in paths ]
 
 
 def rm(*paths: str) -> None:

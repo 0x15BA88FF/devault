@@ -13,10 +13,9 @@ def version() -> None:
     print("v1.0.0 - beta")
 
 
-def ls(paths: list) -> None:
-    for path in paths:
-        for item in os.listdir(path):
-            print(item)
+def ls(path: str) -> None:
+    for item in os.listdir(path):
+        print(item)
 
 
 def touch(paths: list) -> None:
