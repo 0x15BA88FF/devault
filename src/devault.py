@@ -2,9 +2,7 @@ import os
 import re
 import utils
 
-
-DEVAULT_DIR = os.getenv("DEVAULT_DIR") or os.path.expanduser("~/Dev")
-
+DEVDIR = os.getenv("DEVDIR") or os.path.expanduser("~/Dev")
 
 def parse_uri(uri: str):
     URL_PATTERNS = [
@@ -25,25 +23,25 @@ def parse_uri(uri: str):
 
 
 def init() -> None:
-    utils.mkdir([DEVAULT_DIR])
-    print(f"{ DEVAULT_DIR } has been initialized.")
+    utils.mkdir([DEVDIR])
+    print(f"{ DEVDIR } has been initialized.")
 
 
 def ls(*paths: str) -> None:
     if len(paths) < 1: paths = [""]
-    arguments = [f"{ DEVAULT_DIR }/{ path }" for path in paths]
+    arguments = [f"{ DEVDIR }/{ path }" for path in paths]
     utils.ls(arguments)
 
 
 def rm(*paths: str) -> None:
-    arguments = [f"{ DEVAULT_DIR }/{ path }" for path in paths]
+    arguments = [f"{ DEVDIR }/{ path }" for path in paths]
     utils.rm(arguments)
 
 
 def find(query: str) -> None:
     regex = re.compile(query)
     [
-        print(repository) for repository in utils.get_repos(DEVAULT_DIR)
+        print(repository) for repository in utils.get_repos(DEVDIR)
         if regex.search(repository)
     ]
 
@@ -51,10 +49,10 @@ def find(query: str) -> None:
 def clone(*args: str) -> None:
     uri = args[0]
     collections = args[1:] if len(args) > 1 else []
-    collections = [f"{ DEVAULT_DIR }/{ collection }" for collection in collections ]
+    collections = [f"{ DEVDIR }/{ collection }" for collection in collections ]
 
     provider, directory, repository = parse_uri(uri)
-    destination = f"{ DEVAULT_DIR }/hosts/{ provider }/{ directory }/{ repository }/"
+    destination = f"{ DEVDIR }/hosts/{ provider }/{ directory }/{ repository }/"
     utils.clone(uri, destination)
 
     for collection in collections:
@@ -64,7 +62,7 @@ def clone(*args: str) -> None:
 
 def update(*repositories: str) -> None:
     if "." in repositories: repositories = [""]
-    repositories = [f"{ DEVAULT_DIR }/hosts/{ repository }" for repository in repositories]
+    repositories = [f"{ DEVDIR }/hosts/{ repository }" for repository in repositories]
 
     for repository in repositories:
         [utils.update(repository) for repository in utils.get_repos(repository)]
@@ -85,7 +83,7 @@ def mkrepo() -> None:
     starters = input("Starter content (README.md): ") or "README.md"
     collections = input("Add to collection(s): ")
 
-    repository = f"{ DEVAULT_DIR }/hosts/local/{ directory }/{ name }"
+    repository = f"{ DEVDIR }/hosts/local/{ directory }/{ name }"
     starters = [ f"{ repository }/{ item }" for item in starters.split(" ") ]
 
     utils.mkdir([repository])
