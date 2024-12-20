@@ -24,12 +24,9 @@ def touch(paths: list) -> None:
             file.write("")
 
 
-def mkdir(paths: list) -> None:
-    for path in paths:
-        try:
-            os.makedirs(path, exist_ok=True)
-        except OSError as err:
-            raise OSError(f"Failed to create directory { path }.")
+def mkdir(path: str) -> None:
+    try: os.makedirs(path, exist_ok=True)
+    except OSError as err: raise OSError(f"Failed to create directory { path }.")
 
 
 def rm(paths: list) -> None:
