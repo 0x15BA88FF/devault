@@ -23,7 +23,7 @@ def parse_uri(uri: str):
 
 
 def init() -> None:
-    utils.mkdir([DEVDIR])
+    utils.mkdir(DEVDIR)
     print(f"{ DEVDIR } has been initialized.")
 
 
@@ -55,7 +55,7 @@ def clone(*args: str) -> None:
     utils.clone(uri, destination)
 
     for collection in collections:
-        utils.mkdir([collection])
+        utils.mkdir(collection)
         utils.ln(destination, f"{ collection }/{ repository }")
 
 
@@ -85,13 +85,13 @@ def mkrepo() -> None:
     repository = f"{ DEVDIR }/hosts/local/{ directory }/{ name }"
     starters = [ f"{ repository }/{ item }" for item in starters.split(" ") ]
 
-    utils.mkdir([repository])
+    utils.mkdir(repository)
     utils.git_init(repository)
     [ group(repository, collection) for collection in collections ]
 
     for item in starters:
         if item[-1] == "/":
-            utils.mkdir([item])
+            utils.mkdir(item)
         else:
-            utils.mkdir(["/".join(item.split("/")[:-1])])
+            utils.mkdir("/".join(item.split("/")[:-1]))
             utils.touch([item])
