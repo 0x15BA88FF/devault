@@ -78,11 +78,10 @@ def group(*args: str) -> None:
 
 def mkrepo() -> None:
     name = input("Repositories Name: ") or utils.exit(1, print("Repository name required."))
-    directory = input("Repositories directory: ")
     starters = input("Starter content (README.md): ") or "README.md"
     collections = input("Add to collection(s): ")
 
-    repository = f"{ DEVDIR }/hosts/local/{ directory }/{ name }"
+    repository = f"{ DEVDIR }/hosts/local/{ name }"
     starters = [ f"{ repository }/{ item }" for item in starters.split(" ") ]
 
     utils.mkdir(repository)
