@@ -89,6 +89,12 @@ def mkrepo() -> None:
     if collections: group(repository, *collections.split(" "))
 
     for item in starters:
+        item = os.path.realpath(item)
+
+        if len(repository) > len(item) or repository == item[0:len(repository) - 1]:
+            print(f"Starter item { item } is located outside the repository")
+            continue
+
         if item[-1] == "/":
             utils.mkdir(item)
         else:
