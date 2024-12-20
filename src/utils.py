@@ -65,8 +65,7 @@ def clone(uri: str, destination: str) -> None:
 
 def git_init(path: str) -> None:
     try:
-        os.chdir(path)
-        subprocess.run([ "git", "init" ], check=True)
+        subprocess.run([ "git", "init", path ], check=True)
     except Exception as err:
         print(f"Failed to initialize repository { path }: { err }")
 
