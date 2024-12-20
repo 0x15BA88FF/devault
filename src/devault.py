@@ -13,9 +13,9 @@ def parse_uri(uri: str):
     for pattern in URL_PATTERNS:
         match = re.search(pattern, uri)
         if match:
-            provider = match.group("provider")
-            directory = match.group("directory") or ""
-            repository = match.group("repository")
+            provider = match.group("provider").lower()
+            directory = match.group("directory").lower() or ""
+            repository = match.group("repository").lower()
 
             return provider, directory, repository
 
