@@ -68,25 +68,25 @@ def update(*repositories: str) -> None:
 
 
 def group(*args: str) -> None:
-    if len(args) < 2: utils.exit(1, print("At least two arguments required for grouping."))
-    repositories = args[:-1]
-    collection = args[-1]
-
-    for repository in repositories:
-        utils.ln(repository, collection)
+    if len(args) < 2: utils.exit(1, print("At least two arguments required."))
+    collection = f"{ DEVDIR }/{ args[-1] }"
+    utils.mkdir(collection)
+    for repository in args[:-1]:
+        repository_name = repository.strip("/").split("/")[-1]
+        utils.ln(repository, f"{ collection }/{ repository_name }")
 
 
 def mkrepo() -> None:
     name = input("Repositories Name: ") or utils.exit(1, print("Repository name required."))
     starters = input("Starter content (README.md): ") or "README.md"
-    collections = input("Add to collection(s): ")
+    collections = input("Add to collection(s): ").split(" ")
 
     repository = f"{ DEVDIR }/hosts/local/{ name }"
     starters = [ f"{ repository }/{ item }" for item in starters.split(" ") ]
 
     utils.mkdir(repository)
     utils.git_init(repository)
-    [ group(repository, collection) for collection in collections ]
+    group(repository, *collections)
 
     for item in starters:
         if item[-1] == "/":
