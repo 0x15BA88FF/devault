@@ -88,7 +88,7 @@ def clone(url: str, collections: List[str]) -> None:
     for collection in collections:
         collection_path = os.path.join(DEVDIR, collection)
         utils.create_directory(collection_path)
-        utils.create_symlink(destination, os.path.join(DEVDIR, collection, repository))
+        utils.create_symlink(destination, os.path.join(collection_path, repository))
 
 
 def update(*paths: str) -> None:
