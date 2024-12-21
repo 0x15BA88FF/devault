@@ -23,7 +23,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="devault",
         description="A minimal tool to manage your repositories",
-        epilog=f"Run '%(prog)s <command> --help' for more information about a command."
+        epilog="Run '%(prog)s <command> --help' for more information about a command."
     )
 
     parser.add_argument(
