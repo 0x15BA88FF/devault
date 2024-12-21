@@ -97,7 +97,7 @@ def clone(url: str, destination: str) -> None:
     """Clone a repository with git"""
 
     try:
-        os.makedirs(destination, exist_ok=True)
+        create_directory(destination)
         subprocess.run(["git", "clone", url, destination], check=True)
     except Exception as err:
         logger.error("Failed to clone '%s' to '%s': %s", url, destination, err)
