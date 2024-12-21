@@ -1,6 +1,6 @@
 #!/bin/sh
 
-RELEASE_VERSION="v0.0.1-beta"
+RELEASE_VERSION="v1.2.2-beta"
 REPO_URL="https://github.com/0x15BA88FF/devault/releases/download/${RELEASE_VERSION}/devault"
 DESTINATION="/usr/bin/devault"
 
