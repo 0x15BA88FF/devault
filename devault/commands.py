@@ -30,7 +30,6 @@ def parse_url(url: str) -> Tuple[str]:
             directory = match.group("directory") or ""
             repository = match.group("repository")
 
-            print(provider.lower(), directory.lower(), repository.lower())
             return provider.lower(), directory.lower(), repository.lower()
 
     logger.error("Invalid URL '%s' could not be parsed", url)
@@ -117,7 +116,7 @@ def group(*args: str) -> None:
     utils.create_directory(collection_path)
 
     for repository in args[:-1]:
-        repository_name = os.path.basename(repository.rstrip("/"))
+        repository_name = os.path.basename(repository)
         utils.create_symlink(repository, os.path.join(collection_path, repository_name))
 
 
@@ -126,7 +125,7 @@ def mkrepo() -> None:
 
     # [TODO] preview
     # [TODO] feature: using repositories as templates
-    name = input("Repositories name: ").split()
+    name = input("Repositories name: ").strip()
     repository_path = os.path.join(DEVDIR, "hosts", "local", name)
 
     if not utils.is_valid_repo_name(name):
@@ -134,18 +133,18 @@ def mkrepo() -> None:
         sys.exit(1)
     if os.path.isdir(repository_path):
         if not utils.yesno(f"do you want to overwrite {repository_path}? [Y/n]: "):
-            sys.exit(1)
+            sys.exit(0)
 
-    starters = input("Starter content (README.md): ").split() or ["README.md"]
+    starters = input("Starter content (README.md): ").strip().split() or ["README.md"]
     starter_paths = [os.path.join(repository_path, starter) for starter in starters]
 
-    collections = input("Add to collection(s): ").split() or []
+    collections = input("Add to collection(s): ").strip().split() or []
 
     utils.create_directory(repository_path)
     utils.initialize_repository(repository_path)
 
-    if collections:
-        group(repository_path, *collections)
+    for collection in collections:
+        group(repository_path, collection)
 
     for starter_path in starter_paths:
         starter_abs_path = os.path.realpath(starter_path)
