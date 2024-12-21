@@ -1,0 +1,44 @@
+[
+    {
+        "url": "https://github.com/0x15BA88FF/0x15ba88ff.git",
+        "provider": "github.com",
+        "directory": "0x15ba88ff",
+        "repository": "0x15ba88ff"
+    },
+    {
+        "url": "http://github.co/johnDoe/johnsRepo.git",
+        "provider": "github.co",
+        "directory": "johndoe",
+        "repository": "johnsrepo"
+    },
+    {
+        "url": "http://endgit.io/mary-Smith/---smithProjects.git",
+        "provider": "endgit.io",
+        "directory": "mary-smith",
+        "repository": "---smithprojects"
+    },
+    {
+        "url": "https://github.com/ido-nno/ido-nnosRepoWiki.wiki.git",
+        "provider": "github.com",
+        "directory": "ido-nno",
+        "repository": "ido-nnosrepowiki.wiki"
+    },
+    {
+        "url": "http://gitbruh.com/ido-nno/ido-nnosRepoWiki.wiki.git",
+        "provider": "gitbruh.com",
+        "directory": "ido-nno",
+        "repository": "ido-nnosrepowiki.wiki"
+    },
+    {
+        "url": "http://wiki.gitbruh.com/ido-nno/ido-nnosRepoWiki.git",
+        "provider": "wiki.gitbruh.com",
+        "directory": "ido-nno",
+        "repository": "ido-nnosrepowiki"
+    },
+    {
+        "url": "http://wiki.gitbruh.com/ido-nnosRepoWiki.git",
+        "provider": "wiki.gitbruh.com",
+        "directory": "",
+        "repository": "ido-nnosrepowiki"
+    }
+]
