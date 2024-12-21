@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-- ## Types of Changes
+- ## Types of changes
 
   - **Added**: New features.
   - **Changed**: Modifications to existing functionality.
@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add an install / uninstall shell script
+- Add unit test data
 - Template URL parser test case.
 - Repository name validation.
 - Quick prompt helper function.
@@ -29,6 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- User logger setLever method for verbosity argument 
+- User more descriptive variable names
 - Restructured codebase.
 - Adhered to pylint guidelines.
 - Improved `argparse` input parsing and output.
@@ -43,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- prevent invalid method .lower() on NoneType in url parser
 - Prevented devault actions from escaping the `DEVDIR` sandbox.
 - Fixed collection creation from splitting characters.
 - Prevented collections from duplicating.
