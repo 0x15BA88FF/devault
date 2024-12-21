@@ -10,7 +10,7 @@ def exit(code: int = 0) -> None:
 
 
 def version() -> None:
-    print("v1.0.0 - beta")
+    print("v1.1.10 - beta")
 
 def yesno(prompt: str) -> bool:
     response = input(prompt).strip().lower()
