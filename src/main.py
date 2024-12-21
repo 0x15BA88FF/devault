@@ -1,49 +1,79 @@
 import utils
+import logging
+import devault
 import argparse
-from devault import *
-
 
 COMMAND_NAME = "dev"
-
+logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        format='[{levelname}]: {message}',
+        style='{',
+        level=logging.INFO
+    )
+
     parser = argparse.ArgumentParser(
+        prog="devault",
         description="A minimal tool to manage your repositories",
-        epilog="Examples:"
-               f"\n\t{ COMMAND_NAME } init                       # initialize a vault"
-               f"\n\t{ COMMAND_NAME } clone <repo-url>           # Clone a repository",
-        formatter_class=argparse.RawTextHelpFormatter
+        epilog=f"Run '{COMMAND_NAME} <command> --help' for more information about a command."
     )
 
-    parser.add_argument("command",
-        choices=["help", "version", "init", "ls", "rm", "find", "clone", "update", "group", "mkrepo"],
-        help=(
-            "\nhelp                 show list of command-line options"
-            "\nversion              show the current version"
-            "\ninit                 initialize a dev vault"
-            "\nls                   list entities in a vault"
-            "\nrm                   remove entitie"
-            "\nfind                 find a repository (supports regex)"
-            "\nclone                clone a repository to a vault"
-            "\nupdate               pull latest changes from upstream"
-            "\ngroup                group repositories into collections"
-            "\nmkrepo               Create and initialize a local git repository"
-        )
+    parser.add_argument(
+        "-v", "--version",
+        action="store_true",
+        help="Show the current version"
     )
 
-    parser.add_argument("arg", nargs="*", help="Argument for the command.")
+    parser.add_argument(
+        "-V",
+        type=int,
+        default=0,
+        choices=[0, 1, 2, 3],
+        help="increase output verbosity"
+    )
+
+    subparsers = parser.add_subparsers(dest="command")
+
+    init_parser = subparsers.add_parser("init", help="Initialize a dev vault")
+    init_parser.set_defaults(func=lambda args: devault.init())
+
+    ls_parser = subparsers.add_parser("ls", help="List entities in a vault")
+    ls_parser.add_argument("paths", nargs="*", help="Paths to list")
+    ls_parser.set_defaults(func=lambda args: devault.list(*args.paths or [""]))
+
+    rm_parser = subparsers.add_parser("rm", help="Remove entity(ies) from dev vault")
+    rm_parser.add_argument("paths", nargs="+", help="Paths to remove")
+    rm_parser.set_defaults(func=lambda args: devault.remove(*args.paths))
+
+    find_parser = subparsers.add_parser("find", help="Find a repository (supports regex)")
+    find_parser.add_argument("queries", nargs="+", help="Queries to search for")
+    find_parser.set_defaults(func=lambda args: devault.find(*args.queries))
+
+    new_parser = subparsers.add_parser("new", help="Create and initialize a local git repository")
+    new_parser.set_defaults(func=lambda args: devault.mkrepo())
+
+    clone_parser = subparsers.add_parser("clone", help="Clone a repository to a vault")
+    clone_parser.add_argument("url", help="Repository URL to clone")
+    clone_parser.add_argument("collections", nargs="*", help="Collections to add the repository to")
+    clone_parser.set_defaults(func=lambda args: devault.clone(args.url, args.collections))
+
+    update_parser = subparsers.add_parser("update", help="Pull the latest changes from upstream")
+    update_parser.add_argument("paths", nargs="*", help="Paths to update")
+    update_parser.set_defaults(func=lambda args: devault.update(*args.paths))
+
+    group_parser = subparsers.add_parser("group", help="Group repositories into collections")
+    group_parser.add_argument("repositories", nargs="+", help="Repositories to group")
+    group_parser.add_argument("collection", help="Collection name")
+    group_parser.set_defaults(func=lambda args: devault.group(*args.repositories, args.collection))
 
     args = parser.parse_args()
-    command = args.command
-    arguments = args.arg
 
-    if   command == "version":                   utils.version()
-    elif command == "init":                      init()
-    elif command == "ls":                        ls(*arguments)
-    elif command == "rm" and arguments:          rm(*arguments)
-    elif command == "find" and arguments:        find(arguments[0])
-    elif command == "clone" and arguments:       clone(*arguments)
-    elif command == "update" and arguments:      update(*arguments)
-    elif command == "group" and arguments:       group(*arguments)
-    elif command == "mkrepo":                    mkrepo()
-    else:                                        parser.print_help()
+    if args.V >= 3:     logging.basicConfig(level=logging.ERROR)
+    elif args.V >= 2:   logging.basicConfig(level=logging.WARNING)
+    elif args.V >= 1:   logging.basicConfig(level=logging.INFO)
+    elif args.V >= 0:   logging.basicConfig(level=logging.DEBUG)
+
+    if args.version:                utils.version()
+    elif hasattr(args, "func"):     args.func(args)
+    else:                           parser.print_help()

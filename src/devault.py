@@ -1,17 +1,19 @@
 import os
 import re
 import utils
+import logging
 
+logger = logging.getLogger(__name__)
 DEVDIR = os.getenv("DEVDIR") or os.path.expanduser("~/Dev")
 
-def parse_uri(uri: str):
+def parse_url(url: str):
     URL_PATTERNS = [
         r'^https?://(?P<provider>[^/]+)(?:/(?P<directory>.*?))?/(?P<repository>[^/]+)\.git$',
         r'^git@(ssh\.)?(?P<provider>[^:]+)(?::(?P<directory>.*?))?/(?P<repository>[^/]+)\.git$',
     ]
 
     for pattern in URL_PATTERNS:
-        match = re.search(pattern, uri)
+        match = re.search(pattern, url)
         if match:
             provider = match.group("provider").lower()
             directory = match.group("directory").lower() or ""
@@ -19,84 +21,112 @@ def parse_uri(uri: str):
 
             return provider, directory, repository
 
-    raise ValueError("Invalid URL.")
+    logger.error(f"Invalid URL '{url}' could not be parsed")
+    utils.exit(1)
 
 
 def init() -> None:
-    utils.mkdir(DEVDIR)
-    print(f"{ DEVDIR } has been initialized.")
+    utils.create_directory(DEVDIR)
+    logger.info(f"{DEVDIR} has been initialized.")
 
 
-def ls(*paths: str) -> None:
-    if len(paths) < 1: paths = [""]
-    [ utils.ls(f"{ DEVDIR }/{ path }") for path in paths ]
+def list(*paths: str) -> None:
+    for path in paths:
+        full_path = os.path.join(DEVDIR, path)
+        if not full_path.startswith(DEVDIR):
+            logger.warning(f"The path '{full_path}' is outside the dev sandbox.")
+            continue
+        utils.list(os.path.join(full_path))
 
 
-def rm(*paths: str) -> None:
-    arguments = [f"{ DEVDIR }/{ path }" for path in paths]
-    utils.rm(arguments)
+def remove(*paths: str) -> None:
+    for path in paths:
+        full_path = os.path.join(DEVDIR, path)
+        if not full_path.startswith(DEVDIR):
+            logger.warning(f"The path '{full_path}' is outside the dev sandbox.")
+            continue
+        utils.remove(os.path.join(full_path))
 
 
-def find(query: str) -> None:
-    regex = re.compile(query)
-    [
-        print(repository) for repository in utils.get_repos(DEVDIR)
-        if regex.search(repository)
-    ]
+def find(*queries: str) -> None:
+    try:
+        regex = re.compile("|".join(queries))
+        repositories = utils.find_repositories(DEVDIR)
+        matching_repositories = [repo for repo in repositories if regex.search(repo)]
+        for repo in matching_repositories:
+            print(repo)
+    except re.error as err:
+        logger.error(f"Invalid search expression {err}")
+        return
 
 
-def clone(*args: str) -> None:
-    uri = args[0]
-    collections = args[1:] if len(args) > 1 else []
-    collections = [f"{ DEVDIR }/{ collection }" for collection in collections ]
-
-    provider, directory, repository = parse_uri(uri)
-    destination = f"{ DEVDIR }/hosts/{ provider }/{ directory }/{ repository }/"
-    utils.clone(uri, destination)
+def clone(url: str, collections: [str, ...]) -> None:
+    provider, directory, repository = parse_url(url)
+    destination = os.path.join(DEVDIR, "hosts", provider, directory, repository)
+    utils.clone(url, destination)
 
     for collection in collections:
-        utils.mkdir(collection)
-        utils.ln(destination, f"{ collection }/{ repository }")
+        collection_path = os.path.join(DEVDIR, collection)
+        utils.create_directory(collection_path)
+        utils.create_symlink(destination, os.path.join(DEVDIR, collection, repository))
 
 
-def update(*repositories: str) -> None:
-    if "." in repositories: repositories = [""]
-    repositories = [f"{ DEVDIR }/hosts/{ repository }" for repository in repositories]
+def update(*paths: str) -> None:
+    # [TODO] feature: update repos by group / user / provider using /*
+    if "*" in paths:
+        paths = [""]
 
-    for repository in repositories:
-        [utils.update(repository) for repository in utils.get_repos(repository)]
+    for path in paths:
+        path = os.path.join(DEVDIR, path)
+        for repo in utils.find_repositories(path):
+            utils.update_repository(repo)
 
 
 def group(*args: str) -> None:
-    if len(args) < 2: utils.exit(1, print("At least two arguments required."))
-    collection = f"{ DEVDIR }/{ args[-1] }"
-    utils.mkdir(collection)
+    if len(args) < 2:
+        logger.error("At least two arguments are required.")
+        utils.exit(1)
+
+    collection_path = os.path.join(DEVDIR, args[-1])
+    utils.create_directory(collection_path)
+
     for repository in args[:-1]:
-        repository_name = repository.strip("/").split("/")[-1]
-        utils.ln(repository, f"{ collection }/{ repository_name }")
+        repository_name = os.path.basename(repository.rstrip("/"))
+        utils.create_symlink(repository, os.path.join(collection_path, repository_name))
 
 
 def mkrepo() -> None:
-    name = input("Repositories Name: ") or utils.exit(1, print("Repository name required."))
-    starters = input("Starter content (README.md): ") or "README.md"
-    collections = input("Add to collection(s): ")
+    # [TODO] preview
+    # [TODO] feature: using repositories as templates
+    name = input("Repositories name: ").split()
+    repository_path = os.path.join(DEVDIR, "hosts", "local", name)
 
-    repository = f"{ DEVDIR }/hosts/local/{ name }"
-    starters = [ f"{ repository }/{ item }" for item in starters.split(" ") ]
+    if not utils.is_valid_repo_name(name):
+        logger.error(f"{name} is an invalid repository name.")
+        utils.exit(1)
+    if os.path.isdir(repository_path):
+        if not utils.yesno(f"{repository_path} already exists, do you want to overwrite it? [Y/n]: "):
+            utils.exit(1)
 
-    utils.mkdir(repository)
-    utils.git_init(repository)
-    if collections: group(repository, *collections.split(" "))
+    starters = input("Starter content (README.md): ").split() or ["README.md"]
+    starter_paths = [os.path.join(repository_path, starter) for starter in starters]
 
-    for item in starters:
-        item = os.path.realpath(item)
+    collections = input("Add to collection(s): ").split() or []
 
-        if len(repository) > len(item) or repository == item[0:len(repository) - 1]:
-            print(f"Starter item { item } is located outside the repository")
+    utils.create_directory(repository)
+    utils.initialize_repository(repository)
+
+    if collections:
+        group(repository, *collections)
+
+    for starter_path in starter_paths:
+        starter_abs_path = os.path.realpath(starter_path)
+        if not starter_abs_path.startswith(repository_path):
+            logger.warning(f"Starter item {starter} is outside the repository path.")
             continue
 
-        if item[-1] == "/":
-            utils.mkdir(item)
+        if starter.endswith("/"):
+            utils.create_directory(starter)
         else:
-            utils.mkdir("/".join(item.split("/")[:-1]))
-            utils.touch([item])
+            utils.create_directory(os.path.dirname(starter))
+            utils.create_file(starter)
