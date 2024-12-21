@@ -38,7 +38,7 @@ if __name__ == "__main__":
         type=int,
         default=0,
         choices=[0, 1, 2, 3],
-        help="increase output verbosity"
+        help="Increase output verbosity"
     )
 
     subparsers = parser.add_subparsers(dest="command")
@@ -78,13 +78,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.V >= 3:
-        logging.basicConfig(level=logging.ERROR)
+        logger.setLevel(logging.ERROR)
     elif args.V >= 2:
-        logging.basicConfig(level=logging.WARNING)
+        logger.setLevel(logging.WARNING)
     elif args.V >= 1:
-        logging.basicConfig(level=logging.INFO)
-    elif args.V >= 0:
-        logging.basicConfig(level=logging.DEBUG)
+        logger.setLevel(logging.INFO)
+    else:
+        logger.setLevel(logging.DEBUG)
 
     if args.version:
         utils.version()
