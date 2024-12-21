@@ -51,7 +51,7 @@ def list_items(*paths: str) -> None:
         if not full_path.startswith(DEVDIR):
             logger.warning("The path '%s' is outside the dev sandbox.", full_path)
             continue
-        utils.list_items(os.path.join(full_path))
+        utils.list_items(full_path)
 
 
 def remove(*paths: str) -> None:
@@ -62,7 +62,7 @@ def remove(*paths: str) -> None:
         if not full_path.startswith(DEVDIR):
             logger.warning("The path '%s' is outside the dev sandbox.", full_path)
             continue
-        utils.remove(os.path.join(full_path))
+        utils.remove(full_path)
 
 
 def find(*queries: str) -> None:
