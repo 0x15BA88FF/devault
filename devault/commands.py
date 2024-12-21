@@ -47,7 +47,7 @@ def list_items(*paths: str) -> None:
     """Handle listing entities within the DEVDIR"""
 
     for path in paths:
-        full_path = os.path.join(DEVDIR, path)
+        full_path = os.path.realpath(os.path.join(DEVDIR, path))
         if not full_path.startswith(DEVDIR):
             logger.warning("The path '%s' is outside the dev sandbox.", full_path)
             continue
@@ -58,7 +58,7 @@ def remove(*paths: str) -> None:
     """Handle removing entities inside the DEVDIR"""
 
     for path in paths:
-        full_path = os.path.join(DEVDIR, path)
+        full_path = os.path.realpath(os.path.join(DEVDIR, path))
         if not full_path.startswith(DEVDIR):
             logger.warning("The path '%s' is outside the dev sandbox.", full_path)
             continue
@@ -76,6 +76,7 @@ def find(*queries: str) -> None:
             print(repo)
     except re.error as err:
         logger.error("Invalid search expression %s", err)
+        sys.exit(1)
 
 
 def clone(url: str, collections: List[str]) -> None:

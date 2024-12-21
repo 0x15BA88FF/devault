@@ -18,6 +18,7 @@ def version() -> None:
 
     print("v1.2.2 - beta")
 
+
 def yesno(prompt: str) -> bool:
     """Return true / false response from frompt"""
 
@@ -33,8 +34,9 @@ def list_items(path: str) -> None:
             print(item)
     except FileNotFoundError:
         logger.error("Directory %s was not found.", path)
+        sys.exit(1)
     except Exception as err:
-        logger.error(err)
+        logger.error("Failed to list items in '%s': %s", path, err)
         sys.exit(1)
 
 
@@ -45,7 +47,7 @@ def create_file(path: str) -> None:
         with open(path, 'w', encoding="UTF-8") as file:
             file.write("")
     except Exception as err:
-        logger.error("creating file '%s': %e", path, err)
+        logger.error("creating file '%s': %s", path, err)
         sys.exit(1)
 
 
@@ -54,10 +56,8 @@ def create_directory(path: str) -> None:
 
     try:
         os.makedirs(path, exist_ok=True)
-    except OSError as err:
-        logger.error("Failed to create directory '%s': %e", path, err)
     except Exception as err:
-        logger.error(err)
+        logger.error("Failed to create directory '%s': %s", path, err)
         sys.exit(1)
 
 
@@ -74,10 +74,9 @@ def remove(path: str) -> None:
             shutil.rmtree(path)
     except FileNotFoundError:
         logger.error("Path '%s' not found.", path)
-    except OSError as err:
-        logger.error("Failed to remove path '%s': %e", path, err)
+        sys.exit(1)
     except Exception as err:
-        logger.error(err)
+        logger.error("Failed to remove path '%s': %s", path, err)
         sys.exit(1)
 
 
@@ -88,8 +87,9 @@ def create_symlink(target: str, destination: str) -> None:
         os.symlink(target, destination)
     except FileExistsError:
         logger.info("The symlink '%s' already exists.", destination)
+        sys.exit(1)
     except Exception as err:
-        logger.error("Failed to create symlink: %s", err)
+        logger.error("Failed to create symlink '%s' to '%s': %s", target, destination, err)
         sys.exit(1)
 
 
@@ -99,10 +99,8 @@ def clone(url: str, destination: str) -> None:
     try:
         os.makedirs(destination, exist_ok=True)
         subprocess.run(["git", "clone", url, destination], check=True)
-    except subprocess.CalledProcessError:
-        logger.error("Failed to clone repository from '%s'", url)
     except Exception as err:
-        logger.error("Failed to clone '%s' to '%d': %e", url, destination, err)
+        logger.error("Failed to clone '%s' to '%s': %s", url, destination, err)
         sys.exit(1)
 
 
@@ -112,7 +110,7 @@ def initialize_repository(path: str) -> None:
     try:
         subprocess.run(["git", "init", path], check=True)
     except Exception as err:
-        logger.error("Failed to initialize repository %s: %e", path, err)
+        logger.error("Failed to initialize repository %s: %s", path, err)
         sys.exit(1)
 
 
@@ -123,7 +121,7 @@ def update_repository(repository: str) -> None:
         os.chdir(repository)
         subprocess.run(["git", "pull"], check=True)
     except Exception as err:
-        logger.error("Failed to pull updates for '%s': %e", repository, err)
+        logger.error("Failed to pull updates for '%s': %s", repository, err)
         sys.exit(1)
 
 
@@ -137,11 +135,11 @@ def find_repositories(path: str, max_depth: int = 5) -> list:
         return [path]
 
     repositories = []
-    exceptions = [".git", "node_modules"]
+    exceptions = {".git", "node_modules"}
 
     for directory in os.listdir(path):
         full_path = os.path.join(path, directory)
-        if os.path.isdir(full_path) and dir not in exceptions:
+        if os.path.isdir(full_path) and directory not in exceptions:
             repositories.extend(find_repositories(full_path, max_depth - 1))
 
     return repositories
