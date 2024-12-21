@@ -99,8 +99,8 @@ def update(*paths: str) -> None:
         paths = [""]
 
     for path in paths:
-        path = os.path.join(DEVDIR, path)
-        for repo in utils.find_repositories(path):
+        full_path = os.path.join(DEVDIR, path)
+        for repo in utils.find_repositories(full_path):
             utils.update_repository(repo)
 
 
