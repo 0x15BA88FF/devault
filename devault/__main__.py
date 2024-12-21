@@ -86,7 +86,7 @@ if __name__ == "__main__":
         logger.setLevel(logging.DEBUG)
 
     if args.version:
-        utils.version()
+        print(utils.__version__)
     elif hasattr(args, "func"):
         args.func(args)
     else:

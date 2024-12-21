@@ -11,12 +11,9 @@ import shutil
 import logging
 import subprocess
 
+
+__version__ = "v1.2.2 - beta"
 logger = logging.getLogger(__name__)
-
-def version() -> None:
-    """Output version"""
-
-    print("v1.2.2 - beta")
 
 
 def yesno(prompt: str) -> bool:
