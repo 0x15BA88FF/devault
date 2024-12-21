@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.2] 2024-12-21
+
 ### Added
 
 - Add an install / uninstall shell script
@@ -70,4 +72,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `mkrepo` command to create and initialize a local Git repository.
 
 [unreleased]: https://github.com/0x15ba88ff/devault/compare/v1.1.1...HEAD
+[1.2.2]: https://github.com/0x15ba88ff/devault/releases/tag/v1.2.2-beta
 [0.0.1]: https://github.com/0x15ba88ff/devault/releases/tag/v0.0.1-alpha
