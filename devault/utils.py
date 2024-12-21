@@ -1,55 +1,69 @@
+"""
+This script defines all utility / helper functions that handle micro funtionality.
+"""
+
+# pylint: disable=broad-exception-caught
+
 import os
+import re
+import sys
 import shutil
 import logging
 import subprocess
 
 logger = logging.getLogger(__name__)
 
-def exit(code: int = 0) -> None:
-    os._exit(code)
-
-
 def version() -> None:
-    print("v1.1.10 - beta")
+    """Output version"""
+
+    print("v1.2.2 - beta")
 
 def yesno(prompt: str) -> bool:
+    """Return true / false response from frompt"""
+
     response = input(prompt).strip().lower()
     return response == "y"
 
 
-def list(path: str) -> None:
+def list_items(path: str) -> None:
+    """Output items in a path"""
+
     try:
         for item in os.listdir(path):
             print(item)
     except FileNotFoundError:
-        logger.error(f"Directory '{path}' was not found.")
+        logger.error("Directory %s was not found.", path)
     except Exception as err:
         logger.error(err)
-        exit(1)
+        sys.exit(1)
 
 
 def create_file(path: str) -> None:
+    """Create an empty file"""
+
     try:
-        with open(path, 'w') as file:
+        with open(path, 'w', encoding="UTF-8") as file:
             file.write("")
     except Exception as err:
-        logger.error(f"creating file '{path}': {err}")
-    except Exception as err:
-        logger.error(err)
-        exit(1)
+        logger.error("creating file '%s': %e", path, err)
+        sys.exit(1)
 
 
 def create_directory(path: str) -> None:
+    """Create a directory"""
+
     try:
         os.makedirs(path, exist_ok=True)
     except OSError as err:
-        logger.error(f"Failed to create directory '{path}': {err}")
+        logger.error("Failed to create directory '%s': %e", path, err)
     except Exception as err:
         logger.error(err)
-        exit(1)
+        sys.exit(1)
 
 
 def remove(path: str) -> None:
+    """Remove a directory or file"""
+
     if not yesno(f"Are you sure you want to remove '{path}'? [Y/n]: "):
         return
 
@@ -59,61 +73,63 @@ def remove(path: str) -> None:
         elif os.path.isdir(path):
             shutil.rmtree(path)
     except FileNotFoundError:
-        logger.error(f"Path '{path}' not found.")
+        logger.error("Path '%s' not found.", path)
     except OSError as err:
-        logger.error(f"Failed to remove path '{path}': {err}")
+        logger.error("Failed to remove path '%s': %e", path, err)
     except Exception as err:
         logger.error(err)
-        exit(1)
+        sys.exit(1)
 
 
 def create_symlink(target: str, destination: str) -> None:
+    """Create symlink to a directory or file"""
+
     try:
         os.symlink(target, destination)
     except FileExistsError:
-        logger.error(f"The symlink '{destination}' already exists.")
+        logger.info("The symlink '%s' already exists.", destination)
     except Exception as err:
-        logger.error(f"Failed to create symlink: {err}")
-    except Exception as err:
-        logger.error(err)
-        exit(1)
+        logger.error("Failed to create symlink: %s", err)
+        sys.exit(1)
 
 
 def clone(url: str, destination: str) -> None:
+    """Clone a repository with git"""
+
     try:
         os.makedirs(destination, exist_ok=True)
         subprocess.run(["git", "clone", url, destination], check=True)
     except subprocess.CalledProcessError:
-        logger.error(f"Failed to clone repository from '{url}'.")
+        logger.error("Failed to clone repository from '%s'", url)
     except Exception as err:
-        logger.error(f"Failed to clone '{url}' to '{destination}': {err}")
-    except Exception as err:
-        logger.error(err)
-        exit(1)
+        logger.error("Failed to clone '%s' to '%d': %e", url, destination, err)
+        sys.exit(1)
 
 
 def initialize_repository(path: str) -> None:
+    """Initialize an empty repository"""
+
     try:
         subprocess.run(["git", "init", path], check=True)
     except Exception as err:
-        logger.error(f"Failed to initialize repository {path}: {err}")
-    except Exception as err:
-        logger.error(err)
-        exit(1)
+        logger.error("Failed to initialize repository %s: %e", path, err)
+        sys.exit(1)
 
 
 def update_repository(repository: str) -> None:
+    """Pull remote changes"""
+
     try:
         os.chdir(repository)
         subprocess.run(["git", "pull"], check=True)
     except Exception as err:
-        logger.error(f"Failed to pull updates for '{repository}': {err}")
-    except Exception as err:
-        logger.error(err)
-        exit(1)
+        logger.error("Failed to pull updates for '%s': %e", repository, err)
+        sys.exit(1)
 
 
 def find_repositories(path: str, max_depth: int = 5) -> list:
+    """Find all git repositories in path"""
+
     if max_depth <= 0:
         return []
 
@@ -123,14 +139,16 @@ def find_repositories(path: str, max_depth: int = 5) -> list:
     repositories = []
     exceptions = [".git", "node_modules"]
 
-    for dir in os.listdir(path):
-        full_path = os.path.join(path, dir)
+    for directory in os.listdir(path):
+        full_path = os.path.join(path, directory)
         if os.path.isdir(full_path) and dir not in exceptions:
             repositories.extend(find_repositories(full_path, max_depth - 1))
-        
+
     return repositories
 
 
 def is_valid_repo_name(repository: str) -> bool:
+    """Validate repository name"""
+
     invalid_characters = re.compile(r"[^a-zA-Z0-9_-]")
     return not bool(invalid_characters.search(repository.strip()))
