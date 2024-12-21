@@ -1,77 +1,74 @@
-# Dev Vault Dx100 - BETA
+# Dev Vault
 
 ## Overview
 
-Dev Vault is a minimal command-line tool designed to manage your Git repositories efficiently. It provides functionality for initializing a development environment, cloning repositories, organizing them into collections, and more.
+Dev Vault is a minimal command-line tool designed to manage your Git repositories.  
+It provides functionality for initializing environments, organizing them into collections, and more.
 
 ## Features
 
-- **Clone Repositories**: Clone Git repositories from various providers (e.g., GitHub, GitLab) into your vault.
+- **Organize Repositories**: Clone and create repositories from various providers into your vault in a well-structured manner.
 - **Find Repositories**: Search for repositories using regex patterns.
 - **Group Repositories**: Organize repositories into collections for easier management.
 - **Create Local Repositories**: Initialize a new local Git repository with starter content.
 
 ## Installation
 
-### Git Clone
+### 1. UNIX Install Script
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://https://github.com/0x15BA88FF/devault.git
-   cd ./devault
-   ```
+On UNIX operating systems, you can use the install script:
+
+```bash
+sh <(curl https://raw.githubusercontent.com/0x15BA88FF/devault/refs/heads/main/scripts/install.sh)
+```
+
+### 2. Build from Source
+
+Alternatively, use a package builder like PyInstaller to build an executable from the source code:
+
+```bash
+git clone https://github.com/0x15BA88FF/devault.git
+cd ./devault
+
+pip install pyinstaller
+pyinstaller --onefile --name devault --paths devault devault/__main__.py
+```
+
+## Uninstallation
+
+### 1. UNIX Uninstall Script
+
+On UNIX operating systems, you can use the uninstall script:
+
+```bash
+sh <(curl https://raw.githubusercontent.com/0x15BA88FF/devault/refs/heads/main/scripts/uninstall.sh)
+```
+
+### 2. Manual Removal
+
+If installed via the UNIX install script, the binary will be in `/usr/bin`. Simply remove it:
+
+```bash
+sudo rm /usr/bin/devault
+```
+
+If you installed it elsewhere, remove it from the corresponding directory.
 
 ## Usage
 
 ### Command Line Interface
 
-You can interact with Dev Vault through the command line. Here are the available commands:
+Interact with Dev Vault through the command line:
 
 ```bash
-dev <command> [args]
+devault --help
+devault <command> --help
 ```
-
-- **help**: Show a list of command-line options.
-- **version**: Show the current version of the tool.
-- **init**: Initialize a dev vault.
-- **ls**: List entities in the vault.
-- **rm**: Remove an entity from the vault.
-- **find <query>**: Find a repository (supports regex).
-- **clone <repo-url> [collections]**: Clone a repository to the vault and optionally add it to collections.
-- **update [repositories]**: Pull the latest changes from upstream for specified repositories.
-- **group <repositories> <collection>**: Group repositories into a specified collection.
-- **mkrepo**: Create and initialize a local Git repository.
-
-### Examples
-
-- **Initialize a Vault**:
-  ```bash
-  dev init
-  ```
-
-- **Clone a Repository**:
-  ```bash
-  dev clone https://https://github.com/0x15BA88FF/devault.git
-  ```
-
-- **List Repositories**:
-  ```bash
-  dev ls learning/bash
-  ```
-
-- **Find a Repository**:
-  ```bash
-  dev find rust$
-  ```
-
-- **Group Repositories**:
-  ```bash
-  dev group repo1 repo2 my_collection
-  ```
 
 ## Configuration
 
-The tool uses an environment variable `DEVAULT_DIR` to define the base directory for managing repositories. If this variable is not set, it defaults to `~/Dev`. You can set it in your shell configuration file:
+The tool uses an environment variable `DEVDIR` to define the base directory for managing repositories.  
+If this variable is not set, it defaults to `~/Dev`. Set it in your shell configuration file:
 
 ```bash
 export DEVAULT_DIR="/path/to/your/dev/vault"
