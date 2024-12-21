@@ -26,11 +26,12 @@ def parse_url(url: str) -> Tuple[str]:
     for pattern in url_patterns:
         match = re.search(pattern, url)
         if match:
-            provider = match.group("provider").lower()
-            directory = match.group("directory").lower() or ""
-            repository = match.group("repository").lower()
+            provider = match.group("provider")
+            directory = match.group("directory") or ""
+            repository = match.group("repository")
 
-            return provider, directory, repository
+            print(provider.lower(), directory.lower(), repository.lower())
+            return provider.lower(), directory.lower(), repository.lower()
 
     logger.error("Invalid URL '%s' could not be parsed", url)
     sys.exit(1)
