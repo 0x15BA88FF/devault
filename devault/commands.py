@@ -116,8 +116,14 @@ def group(*args: str) -> None:
     utils.create_directory(collection_path)
 
     for repository in args[:-1]:
+        repository_path = os.path.join(DEVDIR, repository)
+
+        if not os.path.isdir(repository_path):
+            logger.warning("The repository %s does not exist", repository_path)
+            continue
+
         repository_name = os.path.basename(repository)
-        utils.create_symlink(repository, os.path.join(collection_path, repository_name))
+        utils.create_symlink(repository_path, os.path.join(collection_path, repository_name))
 
 
 def mkrepo() -> None:
@@ -125,11 +131,11 @@ def mkrepo() -> None:
 
     # [TODO] preview
     # [TODO] feature: using repositories as templates
-    name = input("Repositories name: ").strip()
-    repository_path = os.path.join(DEVDIR, "hosts", "local", name)
+    repository_name = input("Repositories name: ").strip()
+    repository_path = os.path.join(DEVDIR, "hosts", "local", repository_name)
 
-    if not utils.is_valid_repo_name(name):
-        logger.error("%s is an invalid repository name.", name)
+    if not utils.is_valid_repo_name(repository_name):
+        logger.error("%s is an invalid repository name.", repository_name)
         sys.exit(1)
     if os.path.isdir(repository_path):
         if not utils.yesno(f"do you want to overwrite {repository_path}? [Y/n]: "):
@@ -139,21 +145,34 @@ def mkrepo() -> None:
     starter_paths = [os.path.join(repository_path, starter) for starter in starters]
 
     collections = input("Add to collection(s): ").strip().split() or []
+    collection_paths = [os.path.join(DEVDIR, collection) for collection in collections]
 
     utils.create_directory(repository_path)
     utils.initialize_repository(repository_path)
 
-    for collection in collections:
-        group(repository_path, collection)
+    for collection_path in collection_paths:
+        collection_abs_path = os.path.realpath(collection_path)
+
+        if not collection_abs_path.startswith(DEVDIR):
+            logger.warning("The collection %s is outside the dev sandbox.", collection_abs_path)
+            continue
+
+        if collection_abs_path.startswith(os.path.join(DEVDIR, "hosts")):
+            logger.warning("The collection %s can't be in hosts directory.", collection_abs_path)
+            continue
+
+        utils.create_directory(collection_abs_path)
+        utils.create_symlink(repository_path, os.path.join(collection_abs_path, repository_name))
 
     for starter_path in starter_paths:
         starter_abs_path = os.path.realpath(starter_path)
+
         if not starter_abs_path.startswith(repository_path):
-            logger.warning("Starter item %s is outside the repository path.", starter_path)
+            logger.warning("Starter item %s is outside the repository path.", starter_abs_path)
             continue
 
         if starter_path.endswith("/"):
-            utils.create_directory(starter_path)
+            utils.create_directory(starter_abs_path)
         else:
-            utils.create_directory(os.path.dirname(starter_path))
-            utils.create_file(starter_path)
+            utils.create_directory(os.path.dirname(starter_abs_path))
+            utils.create_file(starter_abs_path)

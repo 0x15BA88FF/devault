@@ -18,12 +18,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.2.2] 2024-12-21
+### Changed
+
+- Update changelog.
+- Use absolute paths.
+- Use `repository_name` instead of `name`.
+
+### Fixed
+
+- Fix group function linking to nonexistent directories.
+- Prevent creating collections outside the dev directory.
+- Prevent creating collections inside the hosts directory.
+
+## [1.2.2] - 2024-12-21
 
 ### Added
 
-- Add an install / uninstall shell script
-- Add unit test data
+- Add an install/uninstall shell script.
+- Add unit test data.
 - Template URL parser test case.
 - Repository name validation.
 - Quick prompt helper function.
@@ -33,30 +45,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- User logger setLever method for verbosity argument 
-- User more descriptive variable names
-- Restructured codebase.
-- Adhered to pylint guidelines.
-- Improved `argparse` input parsing and output.
-- Renamed helper functions to more descriptive names.
-- Modified helper functions (`touch`, `mkdir`, `ln`, `ls`) to accept a single path parameter.
-- Converted all URL groups to lowercase during parsing.
-- Renamed `DEVAULT_DIR` environment variable to `DEVDIR`.
+- Use logger setLevel method for verbosity argument.
+- Use more descriptive variable names.
+- Restructure codebase.
+- Adhere to pylint guidelines.
+- Improve `argparse` input parsing and output.
+- Rename helper functions to more descriptive names.
+- Modify helper functions (`touch`, `mkdir`, `ln`, `ls`) to accept a single path parameter.
+- Convert all URL groups to lowercase during parsing.
+- Rename `DEVAULT_DIR` environment variable to `DEVDIR`.
 
 ### Removed
 
-- Replaced exit utility with `sys.exit()`.
+- Replace exit utility with `sys.exit()`.
 
 ### Fixed
 
-- prevent invalid method .lower() on NoneType in url parser
-- Prevented devault actions from escaping the `DEVDIR` sandbox.
-- Fixed collection creation from splitting characters.
-- Prevented collections from duplicating.
-- Prevented repositories from creating collections of themselves.
-- Prevented invalid regex query injection.
-- Prevented starter content from being created outside the repository.
-- Added a maximum recursion depth to prevent unnecessary and infinite recursion.
+- Prevent invalid method .lower() on NoneType in URL parser.
+- Prevent devault actions from escaping the `DEVDIR` sandbox.
+- Fix collection creation from splitting characters.
+- Prevent collections from duplicating.
+- Prevent repositories from creating collections of themselves.
+- Prevent invalid regex query injection.
+- Prevent starter content from being created outside the repository.
+- Add a maximum recursion depth to prevent unnecessary and infinite recursion.
 
 ## [0.0.1] - 2024-12-15
 
@@ -74,3 +86,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [unreleased]: https://github.com/0x15ba88ff/devault/compare/v1.1.1...HEAD
 [1.2.2]: https://github.com/0x15ba88ff/devault/releases/tag/v1.2.2-beta
 [0.0.1]: https://github.com/0x15ba88ff/devault/releases/tag/v0.0.1-alpha
+
