@@ -145,5 +145,5 @@ def find_repositories(path: str, max_depth: int = 5) -> list:
 def is_valid_repo_name(repository: str) -> bool:
     """Validate repository name"""
 
-    invalid_characters = re.compile(r"[^a-zA-Z0-9_-]")
+    invalid_characters = re.compile(r"[^a-zA-Z0-9_-.]")
     return not bool(invalid_characters.search(repository.strip()))

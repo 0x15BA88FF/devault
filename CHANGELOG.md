@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Allow periods `.` in repository name.
+
 ### Fixed
 
 - Prevent directory expansion of NoneType.
