@@ -13,7 +13,7 @@ from typing import List, Tuple
 import utils
 
 logger = logging.getLogger(__name__)
-DEVDIR = os.getenv("DEVDIR") or os.path.expanduser("~/Dev")
+DEVDIR = os.path.expanduser(os.getenv("DEVDIR")) or os.path.expanduser("~/Dev")
 
 def parse_url(url: str) -> Tuple[str]:
     """split url into sections"""

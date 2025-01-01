@@ -20,8 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- prevent vault operations on non-initializes vaults
-- fix group linking to non-existent file
+- Resolve DEVDIR env variable with with user directory.
+- Prevent vault operations on non-initializes vaults.
+- Fix group linking to non-existent file.
 
 ### Changed
 
