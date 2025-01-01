@@ -36,6 +36,14 @@ def parse_url(url: str) -> Tuple[str]:
     sys.exit(1)
 
 
+def check_dev_dir() -> None:
+    """Check if dev directory exists"""
+
+    if not os.path.isdir(DEVDIR):
+        logger.error("No dev directory exists, create one with 'devault init'")
+        sys.exit(1)
+
+
 def init() -> None:
     """Initialize the DEVDIR"""
 
@@ -45,6 +53,8 @@ def init() -> None:
 
 def list_items(*paths: str) -> None:
     """Handle listing entities within the DEVDIR"""
+
+    check_dev_dir()
 
     for path in paths:
         full_path = os.path.realpath(os.path.join(DEVDIR, path))
@@ -57,6 +67,8 @@ def list_items(*paths: str) -> None:
 def remove(*paths: str) -> None:
     """Handle removing entities inside the DEVDIR"""
 
+    check_dev_dir()
+
     for path in paths:
         full_path = os.path.realpath(os.path.join(DEVDIR, path))
         if not full_path.startswith(DEVDIR):
@@ -67,6 +79,8 @@ def remove(*paths: str) -> None:
 
 def find(*queries: str) -> None:
     """Handle finding repositories in the DEVDIR"""
+
+    check_dev_dir()
 
     try:
         regex = re.compile("|".join(queries))
@@ -82,6 +96,8 @@ def find(*queries: str) -> None:
 def clone(url: str, collections: List[str]) -> None:
     """Handle cloning remote repositories"""
 
+    check_dev_dir()
+
     provider, directory, repository = parse_url(url)
     destination = os.path.join(DEVDIR, "hosts", provider, directory, repository)
     utils.clone(url, destination)
@@ -95,6 +111,8 @@ def clone(url: str, collections: List[str]) -> None:
 def update(*paths: str) -> None:
     """Handle pulling remote changes from upstream repositories"""
 
+    check_dev_dir()
+
     # [TODO] feature: update repos by group / user / provider using /*
     if "*" in paths:
         paths = [""]
@@ -107,6 +125,8 @@ def update(*paths: str) -> None:
 
 def group(*args: str) -> None:
     """Handle linking repositories into collections"""
+
+    check_dev_dir()
 
     if len(args) < 2:
         logger.error("At least two arguments are required.")
@@ -128,6 +148,8 @@ def group(*args: str) -> None:
 
 def mkrepo() -> None:
     """Handle creating new local repositories"""
+
+    check_dev_dir()
 
     # [TODO] preview
     # [TODO] feature: using repositories as templates
