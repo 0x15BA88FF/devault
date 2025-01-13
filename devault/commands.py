@@ -151,8 +151,6 @@ def mkrepo() -> None:
 
     check_dev_dir()
 
-    # [TODO] preview
-    # [TODO] feature: using repositories as templates
     repository_name = input("Repositories name: ").strip()
     repository_path = os.path.join(DEVDIR, "hosts", "local", repository_name)
 
