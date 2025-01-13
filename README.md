@@ -76,9 +76,11 @@ export DEVAULT_DIR="/path/to/your/dev/vault"
 
 ## TODO
 
-> [TODO] feature: update repos by group / user provider using wildcard.
-> [TODO] preview make repo output.
-> [TODO] feature: using repositories as templates.
+> Feature: update repos by group / user provider using wildcard.
+
+> Preview make repo output.
+
+> Feature: using repositories as templates.
 
 
 ## Contributing
