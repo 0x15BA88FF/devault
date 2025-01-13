@@ -74,6 +74,13 @@ If this variable is not set, it defaults to `~/Dev`. Set it in your shell config
 export DEVAULT_DIR="/path/to/your/dev/vault"
 ```
 
+## TODO
+
+> [TODO] feature: update repos by group / user provider using wildcard.
+> [TODO] preview make repo output.
+> [TODO] feature: using repositories as templates.
+
+
 ## Contributing
 
 Contributions are welcome! Feel free to open issues or submit pull requests to enhance the functionality of Dev Vault.
