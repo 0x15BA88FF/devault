@@ -113,7 +113,6 @@ def update(*paths: str) -> None:
 
     check_dev_dir()
 
-    # [TODO] feature: update repos by group / user / provider using /*
     if "*" in paths:
         paths = [""]
 
